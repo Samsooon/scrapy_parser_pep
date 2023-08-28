@@ -1,3 +1,5 @@
+from urllib.parse import urljoin
+
 import scrapy
 
 
@@ -11,6 +13,7 @@ class PepSpider(scrapy.Spider):
             '//a[@class="pep reference internal"]/@href'
         ).getall()
         for link in links:
+            link = urljoin(self.start_urls[0], link, '/')
             yield response.follow(link, callback=self.parse_pep)
 
     def parse_pep(self, response):

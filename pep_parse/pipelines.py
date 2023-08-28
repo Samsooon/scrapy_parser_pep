@@ -1,3 +1,4 @@
+from collections import defaultdict
 from itemadapter import ItemAdapter
 from pathlib import Path
 import csv
@@ -9,15 +10,12 @@ BASE_DIR = Path(__file__).parent.parent
 
 class PepParsePipeline:
     def open_spider(self, spider):
-        self.__status_vocabulary = {}
+        self.__pep_statuses = defaultdict(int)
 
     def process_item(self, item, spider):
         adapter = ItemAdapter(item)
         if adapter.get('status'):
-            pep_status = adapter['status']
-            self.__status_vocabulary[pep_status] = (
-                self.__status_vocabulary.get(pep_status, 0) + 1
-            )
+            self.__pep_statuses[adapter['status']] += 1
             return item
 
     def close_spider(self, spider):
@@ -29,7 +27,7 @@ class PepParsePipeline:
             ).writerows(
                 (
                     ('Статус', 'Количество'),
-                    *self.__status_vocabulary.items(),
-                    ('Total', sum(self.__status_vocabulary.values()))
+                    *self.__pep_statuses.items(),
+                    ('Total', sum(self.__pep_statuses.values()))
                 )
             )
